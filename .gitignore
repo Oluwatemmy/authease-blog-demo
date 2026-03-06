@@ -25,3 +25,7 @@ media/
 # OS
 Thumbs.db
 .DS_Store
+
+# Claude and playwright setup files
+.claude/
+.playwright-mcp/
