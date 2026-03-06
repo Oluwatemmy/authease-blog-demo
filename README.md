@@ -42,7 +42,7 @@ This project showcases every auth feature authease provides through both **Djang
 
 ```bash
 # Clone the repo
-git clone https://github.com/<your-username>/authease-blog-demo.git
+git clone https://github.com/Oluwatemmy/authease-blog-demo.git
 cd authease-blog-demo
 
 # Create virtual environment
