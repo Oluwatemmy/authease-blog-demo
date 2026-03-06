@@ -1,0 +1,64 @@
+{% extends "blog/base.html" %}
+{% load blog_extras %}
+
+{% block title %}Home - BlogApp{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+{% if not user.is_authenticated %}
+<div class="hero p-5 mb-5 text-center">
+    <h1 class="fw-bold mb-3">Share your stories with the world</h1>
+    <p class="lead mb-4 opacity-75">A place to write, read, and connect with great thinkers and storytellers.</p>
+    <a href="{% url 'authease-register' %}" class="btn btn-light btn-lg px-4 fw-semibold">Start Writing</a>
+</div>
+{% endif %}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h4 class="fw-bold mb-0">Latest Posts</h4>
+</div>
+
+{% if posts %}
+<div class="row g-4">
+    {% for post in posts %}
+    <div class="col-md-6 col-lg-4">
+        <div class="card post-card h-100">
+            <div class="card-body d-flex flex-column p-4">
+                <div class="d-flex align-items-center gap-2 mb-3">
+                    <img src="{{ post.author|avatar_url }}" class="author-avatar" alt="">
+                    <div>
+                        <span class="fw-semibold" style="font-size: 0.85rem;">{{ post.author.first_name }} {{ post.author.last_name }}</span>
+                        <div class="post-meta">{{ post.created_at|date:"M d, Y" }}</div>
+                    </div>
+                </div>
+                <h5 class="card-title mb-2">
+                    <a href="{% url 'post-detail-view' post.pk %}" class="text-decoration-none">
+                        {{ post.title }}
+                    </a>
+                </h5>
+                <p class="text-muted small flex-grow-1 mb-3">
+                    {{ post.content|truncatewords:25 }}
+                </p>
+                <div class="d-flex justify-content-between align-items-center mt-auto pt-3 border-top">
+                    <div class="d-flex gap-3 post-meta">
+                        <span><i class="bi bi-heart-fill text-danger me-1"></i>{{ post.likes.count }}</span>
+                        <span><i class="bi bi-chat me-1"></i>{{ post.comments.count }}</span>
+                    </div>
+                    <span class="reading-time">{{ post.content|reading_time }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="text-center py-5">
+    <i class="bi bi-journal-x display-1 text-muted"></i>
+    <h4 class="mt-3 text-muted">No posts yet</h4>
+    {% if user.is_authenticated %}
+    <a href="{% url 'create-post' %}" class="btn btn-brand mt-2">Create the first post</a>
+    {% else %}
+    <p class="text-muted">Sign up to create the first post!</p>
+    {% endif %}
+</div>
+{% endif %}
+{% endblock %}

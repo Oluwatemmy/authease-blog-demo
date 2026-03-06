@@ -1,0 +1,24 @@
+{% extends "blog/base.html" %}
+
+{% block title %}Delete Post - BlogApp{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-5">
+        <div class="card border-0 shadow-sm" style="border-radius: 12px;">
+            <div class="card-body p-5 text-center">
+                <div class="bg-danger bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 64px; height: 64px;">
+                    <i class="bi bi-trash display-6 text-danger"></i>
+                </div>
+                <h4 class="fw-bold">Delete Post?</h4>
+                <p class="text-muted">Are you sure you want to delete "<strong>{{ post.title }}</strong>"? This action cannot be undone.</p>
+                <form method="post" class="d-flex gap-2 justify-content-center mt-4">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger rounded-pill px-4">Delete</button>
+                    <a href="{% url 'post-detail-view' post.pk %}" class="btn btn-light rounded-pill px-4">Cancel</a>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,36 @@
+{% extends "blog/base.html" %}
+
+{% block title %}{{ action }} Post - BlogApp{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card border-0 shadow-sm" style="border-radius: 12px;">
+            <div class="card-body p-4 p-md-5">
+                <h2 class="fw-bold mb-4">{{ action }} Post</h2>
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="mb-4">
+                        <input type="text" class="form-control form-control-lg border-0 bg-light fw-semibold"
+                               id="title" name="title"
+                               value="{% if post %}{{ post.title }}{% endif %}"
+                               placeholder="Post title..."
+                               style="border-radius: 10px; font-size: 1.4rem;" required>
+                    </div>
+                    <div class="mb-4">
+                        <textarea class="form-control border-0 bg-light" id="content" name="content" rows="15"
+                                  placeholder="Tell your story..."
+                                  style="border-radius: 10px; line-height: 1.8; resize: none;" required>{% if post %}{{ post.content }}{% endif %}</textarea>
+                    </div>
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-brand px-4 rounded-pill">
+                            <i class="bi bi-check-lg me-1"></i>Publish
+                        </button>
+                        <a href="{% url 'home' %}" class="btn btn-light px-4 rounded-pill">Cancel</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,52 @@
+{% extends "blog/base.html" %}
+
+{% block title %}Sign Up - BlogApp{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-5">
+        <div class="card border-0 shadow-sm" style="border-radius: 12px;">
+            <div class="card-body p-4 p-md-5">
+                <div class="text-center mb-4">
+                    <h2 class="fw-bold">Create Account</h2>
+                    <p class="text-muted">Join the community and start writing</p>
+                </div>
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="row g-3 mb-3">
+                        <div class="col">
+                            <label for="first_name" class="form-label small fw-semibold">First Name</label>
+                            <input type="text" class="form-control border-0 bg-light" id="first_name" name="first_name"
+                                   value="{{ first_name|default:'' }}" placeholder="John" style="border-radius: 10px;" required>
+                        </div>
+                        <div class="col">
+                            <label for="last_name" class="form-label small fw-semibold">Last Name</label>
+                            <input type="text" class="form-control border-0 bg-light" id="last_name" name="last_name"
+                                   value="{{ last_name|default:'' }}" placeholder="Doe" style="border-radius: 10px;" required>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="email" class="form-label small fw-semibold">Email</label>
+                        <input type="email" class="form-control border-0 bg-light" id="email" name="email"
+                               value="{{ email|default:'' }}" placeholder="you@example.com" style="border-radius: 10px;" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="password" class="form-label small fw-semibold">Password</label>
+                        <input type="password" class="form-control border-0 bg-light" id="password" name="password"
+                               placeholder="Create a password" style="border-radius: 10px;" required>
+                    </div>
+                    <div class="mb-4">
+                        <label for="confirm_password" class="form-label small fw-semibold">Confirm Password</label>
+                        <input type="password" class="form-control border-0 bg-light" id="confirm_password" name="confirm_password"
+                               placeholder="Confirm your password" style="border-radius: 10px;" required>
+                    </div>
+                    <button type="submit" class="btn btn-brand w-100 rounded-pill py-2 fw-semibold mb-3">Sign Up</button>
+                </form>
+                <p class="text-center text-muted small mb-0">
+                    Already have an account? <a href="{% url 'authease-login' %}" class="text-decoration-none fw-semibold">Login</a>
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

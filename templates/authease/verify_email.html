@@ -1,0 +1,98 @@
+{% extends "blog/base.html" %}
+
+{% block title %}Verify Email - BlogApp{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-5">
+        <div class="card border-0 shadow-sm" style="border-radius: 12px;">
+            <div class="card-body p-4 p-md-5">
+                <div class="text-center mb-4">
+                    <div class="bg-primary bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 64px; height: 64px;">
+                        <i class="bi bi-envelope-check display-6 text-primary"></i>
+                    </div>
+                    <h3 class="fw-bold">Verify Your Email</h3>
+                    <p class="text-muted">
+                        {% if email %}
+                        We sent a verification code to <strong>{{ email }}</strong>
+                        {% else %}
+                        Enter the verification code sent to your email.
+                        {% endif %}
+                    </p>
+                </div>
+
+                <form method="post" action="{% url 'authease-verify-email' %}">
+                    {% csrf_token %}
+                    <div class="mb-4">
+                        <input type="text" class="form-control form-control-lg border-0 bg-light text-center fw-semibold"
+                               id="otp" name="otp" placeholder="Enter code"
+                               maxlength="10" autocomplete="one-time-code"
+                               style="border-radius: 10px; letter-spacing: 0.2em;" required>
+                    </div>
+                    <button type="submit" class="btn btn-brand w-100 rounded-pill py-2 fw-semibold mb-3">Verify</button>
+                </form>
+
+                <hr class="my-4">
+                <p class="text-center text-muted small mb-2">Didn't receive the code?</p>
+                <form method="post" action="{% url 'authease-resend-otp' %}" id="resend-form">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-light w-100 rounded-pill" id="resend-btn" disabled>
+                        <span id="resend-text">Resend Code</span>
+                        <span id="resend-timer" class="ms-1"></span>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+(function() {
+    var COOLDOWN = {{ cooldown|default:60 }};
+    var STORAGE_KEY = 'otp_resend_ts';
+    var btn = document.getElementById('resend-btn');
+    var timerSpan = document.getElementById('resend-timer');
+    var form = document.getElementById('resend-form');
+
+    function getRemaining() {
+        var ts = localStorage.getItem(STORAGE_KEY);
+        if (!ts) return 0;
+        var elapsed = Math.floor((Date.now() - parseInt(ts)) / 1000);
+        return Math.max(0, COOLDOWN - elapsed);
+    }
+
+    function updateUI() {
+        var remaining = getRemaining();
+        if (remaining > 0) {
+            btn.disabled = true;
+            timerSpan.textContent = '(' + remaining + 's)';
+        } else {
+            btn.disabled = false;
+            timerSpan.textContent = '';
+        }
+    }
+
+    function startTimer() {
+        localStorage.setItem(STORAGE_KEY, Date.now().toString());
+        updateUI();
+        var interval = setInterval(function() {
+            updateUI();
+            if (getRemaining() <= 0) clearInterval(interval);
+        }, 1000);
+    }
+
+    var remaining = getRemaining();
+    if (remaining <= 0) {
+        startTimer();
+    } else {
+        updateUI();
+        var interval = setInterval(function() {
+            updateUI();
+            if (getRemaining() <= 0) clearInterval(interval);
+        }, 1000);
+    }
+
+    form.addEventListener('submit', function() { startTimer(); });
+})();
+</script>
+{% endblock %}

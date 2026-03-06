@@ -1,0 +1,118 @@
+{% extends "blog/base.html" %}
+{% load blog_extras %}
+
+{% block title %}{{ post.title }} - BlogApp{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <article class="card border-0 shadow-sm mb-4" style="border-radius: 12px;">
+            <div class="card-body p-4 p-md-5">
+                <h1 class="fw-bold mb-3" style="line-height: 1.3;">{{ post.title }}</h1>
+
+                <div class="d-flex align-items-center gap-3 mb-4 pb-4 border-bottom">
+                    <img src="{{ post.author|avatar_url }}" class="author-avatar-lg" alt="">
+                    <div>
+                        <span class="fw-semibold">{{ post.author.first_name }} {{ post.author.last_name }}</span>
+                        {% if post.author.bio %}
+                        <div class="text-muted small">{{ post.author.bio|truncatewords:10 }}</div>
+                        {% endif %}
+                    </div>
+                    <div class="ms-auto text-end post-meta">
+                        <div>{{ post.created_at|date:"M d, Y" }}</div>
+                        <span class="reading-time">{{ post.content|reading_time }}</span>
+                    </div>
+                </div>
+
+                <div class="mb-4" style="white-space: pre-wrap; line-height: 1.9; font-size: 1.05rem; color: #334155;">{{ post.content }}</div>
+
+                <div class="d-flex align-items-center gap-3 pt-3 border-top">
+                    {% if user.is_authenticated %}
+                    <form method="post" action="{% url 'like-post' post.pk %}">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-sm like-btn {% if is_liked %}btn-danger{% else %}btn-outline-danger{% endif %} rounded-pill px-3">
+                            <i class="bi {% if is_liked %}bi-heart-fill{% else %}bi-heart{% endif %} me-1"></i>
+                            {{ post.likes.count }}
+                        </button>
+                    </form>
+                    {% else %}
+                    <span class="text-muted small">
+                        <i class="bi bi-heart me-1"></i>{{ post.likes.count }} likes
+                    </span>
+                    {% endif %}
+
+                    <span class="text-muted small">
+                        <i class="bi bi-chat me-1"></i>{{ post.comments.count }} comments
+                    </span>
+
+                    {% if user == post.author %}
+                    <div class="ms-auto d-flex gap-1">
+                        <a href="{% url 'edit-post' post.pk %}" class="btn btn-sm btn-outline-secondary rounded-pill px-3">
+                            <i class="bi bi-pencil me-1"></i>Edit
+                        </a>
+                        <a href="{% url 'delete-post' post.pk %}" class="btn btn-sm btn-outline-danger rounded-pill px-3">
+                            <i class="bi bi-trash me-1"></i>Delete
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </article>
+
+        <!-- Comments -->
+        <div class="card border-0 shadow-sm" style="border-radius: 12px;">
+            <div class="card-body p-4">
+                <h5 class="fw-bold mb-4">Comments ({{ post.comments.count }})</h5>
+
+                {% if user.is_authenticated %}
+                <div class="d-flex gap-3 mb-4">
+                    <img src="{{ user|avatar_url }}" class="author-avatar mt-1" alt="">
+                    <form method="post" action="{% url 'add-comment' post.pk %}" class="flex-grow-1">
+                        {% csrf_token %}
+                        <textarea name="content" class="form-control border-0 bg-light" rows="3"
+                                  placeholder="Share your thoughts..." required
+                                  style="border-radius: 10px; resize: none;"></textarea>
+                        <div class="text-end mt-2">
+                            <button type="submit" class="btn btn-brand btn-sm rounded-pill px-3">
+                                <i class="bi bi-send me-1"></i>Comment
+                            </button>
+                        </div>
+                    </form>
+                </div>
+                {% else %}
+                <p class="text-muted mb-4">
+                    <a href="{% url 'authease-login' %}" class="text-decoration-none">Log in</a> to leave a comment.
+                </p>
+                {% endif %}
+
+                {% for comment in post.comments.all %}
+                <div class="comment-box mb-3">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div class="d-flex align-items-center gap-2">
+                            <img src="{{ comment.author|avatar_url }}" class="author-avatar-sm" alt="">
+                            <strong class="small">{{ comment.author.first_name }} {{ comment.author.last_name }}</strong>
+                            <span class="post-meta">{{ comment.created_at|timesince }} ago</span>
+                        </div>
+                        {% if user == comment.author %}
+                        <form method="post" action="{% url 'delete-comment' comment.pk %}">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-sm btn-link text-muted p-0" title="Delete">
+                                <i class="bi bi-x-lg"></i>
+                            </button>
+                        </form>
+                        {% endif %}
+                    </div>
+                    <p class="mb-0 mt-2 small" style="color: #475569;">{{ comment.content }}</p>
+                </div>
+                {% empty %}
+                <p class="text-muted text-center small py-3">No comments yet. Be the first to share your thoughts!</p>
+                {% endfor %}
+            </div>
+        </div>
+
+        <a href="{% url 'home' %}" class="btn btn-link text-muted mt-3 text-decoration-none">
+            <i class="bi bi-arrow-left me-1"></i>Back to all posts
+        </a>
+    </div>
+</div>
+{% endblock %}

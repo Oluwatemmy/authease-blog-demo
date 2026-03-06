@@ -1,0 +1,54 @@
+{% extends "blog/base.html" %}
+{% load blog_extras %}
+
+{% block title %}My Posts - BlogApp{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h4 class="fw-bold mb-0">My Posts</h4>
+    <a href="{% url 'create-post' %}" class="btn btn-brand btn-sm rounded-pill px-3">
+        <i class="bi bi-plus-lg me-1"></i>New Post
+    </a>
+</div>
+
+{% if posts %}
+<div class="row g-3">
+    {% for post in posts %}
+    <div class="col-12">
+        <div class="card border-0 shadow-sm" style="border-radius: 12px;">
+            <div class="card-body p-4">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div class="flex-grow-1">
+                        <h5 class="fw-semibold mb-1">
+                            <a href="{% url 'post-detail-view' post.pk %}" class="text-decoration-none text-dark">{{ post.title }}</a>
+                        </h5>
+                        <p class="text-muted small mb-2">{{ post.content|truncatewords:30 }}</p>
+                        <div class="d-flex gap-3 align-items-center post-meta">
+                            <span>{{ post.created_at|date:"M d, Y" }}</span>
+                            <span><i class="bi bi-heart-fill text-danger me-1"></i>{{ post.likes.count }}</span>
+                            <span><i class="bi bi-chat me-1"></i>{{ post.comments.count }}</span>
+                            <span class="reading-time">{{ post.content|reading_time }}</span>
+                        </div>
+                    </div>
+                    <div class="d-flex gap-1 ms-3">
+                        <a href="{% url 'edit-post' post.pk %}" class="btn btn-sm btn-light rounded-pill px-3">
+                            <i class="bi bi-pencil"></i>
+                        </a>
+                        <a href="{% url 'delete-post' post.pk %}" class="btn btn-sm btn-light rounded-pill px-3 text-danger">
+                            <i class="bi bi-trash"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="text-center py-5">
+    <i class="bi bi-journal-x display-1 text-muted"></i>
+    <h4 class="mt-3 text-muted">You haven't written any posts yet</h4>
+    <a href="{% url 'create-post' %}" class="btn btn-brand mt-2 rounded-pill px-4">Write your first post</a>
+</div>
+{% endif %}
+{% endblock %}
