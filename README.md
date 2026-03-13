@@ -13,6 +13,7 @@ This project showcases every auth feature authease provides through both **Djang
 - **Password reset** via email link
 - **Change password** from settings page
 - **Profile management** with custom fields (bio, profile picture, website, date of birth)
+- **OAuth social login** — Sign in with **Google** or **GitHub**
 - **Extensible User model** via `AbstractAutheaseUser`
 
 ### Blog Features
@@ -21,6 +22,8 @@ This project showcases every auth feature authease provides through both **Djang
 - Comment system with author-only delete
 - "My Posts" dashboard
 - Reading time estimates
+- **Dark mode** with theme toggle and persistence
+- **Responsive design** with mobile offcanvas navigation
 
 ### API (DRF + Swagger)
 - Full REST API for all blog operations
@@ -110,6 +113,27 @@ AUTH_USER_MODEL = 'blog.User'           # Point to your custom user model
 EMAIL_BACKEND = '...'                    # Configure your email backend
 SITE_NAME = 'Blog App'                  # Used in emails
 SITE_URL = 'http://localhost:8000'       # Used for password reset links
+```
+
+### OAuth Setup (Optional)
+
+To enable social login, add your OAuth credentials to `settings.py`:
+
+**GitHub:**
+1. Create an OAuth App at [GitHub Developer Settings](https://github.com/settings/developers)
+2. Set the callback URL to `http://localhost:8000/oauth/github/callback/`
+3. Add to settings:
+```python
+GITHUB_CLIENT_ID = 'your-client-id'
+GITHUB_CLIENT_SECRET = 'your-client-secret'
+```
+
+**Google:**
+1. Create OAuth credentials in [Google Cloud Console](https://console.cloud.google.com/apis/credentials)
+2. Set authorized redirect URI to `http://localhost:8000/oauth/google/callback/`
+3. Add to settings:
+```python
+GOOGLE_CLIENT_ID = 'your-client-id'
 ```
 
 ## Screenshots

@@ -2,6 +2,7 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
+from blog import frontend_views
 from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
 from rest_framework import permissions
@@ -30,6 +31,12 @@ urlpatterns = [
 
     # Auth frontend (from authease package)
     path('accounts/', include('authease.auth_core.frontend_urls')),
+
+    # OAuth frontend
+    path('oauth/github/login/', frontend_views.github_login, name='github-login'),
+    path('oauth/github/callback/', frontend_views.github_callback, name='github-callback'),
+    path('oauth/google/login/', frontend_views.google_login, name='google-login'),
+    path('oauth/google/callback/', frontend_views.google_callback, name='google-callback'),
 
     # Blog frontend
     path('', include('blog.frontend_urls')),

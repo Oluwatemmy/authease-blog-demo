@@ -10,7 +10,12 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/6.0/ref/settings/
 """
 
+import os
 from pathlib import Path
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -68,6 +73,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'blog.context_processors.oauth_settings',
             ],
         },
     },
@@ -158,13 +164,19 @@ EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
 # Authease settings
 SITE_NAME = 'Blog App'
-SITE_URL = 'http://localhost:8000'
+SITE_URL = 'http://localhost:8080'
 PASSWORD_RESET_TIMEOUT = 1800
 
 # Login URLs for Django template auth
 LOGIN_URL = '/accounts/login/'
 LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = '/'
+
+# OAuth settings (set these in .env or environment variables for production)
+GOOGLE_CLIENT_ID = os.getenv('GOOGLE_CLIENT_ID')  # Your Google OAuth2 Client ID
+GOOGLE_CLIENT_SECRET = os.getenv('GOOGLE_CLIENT_SECRET')  # Your Google OAuth2 Client Secret
+GITHUB_CLIENT_ID = os.getenv('GITHUB_CLIENT_ID')  # Your GitHub OAuth App Client ID
+GITHUB_CLIENT_SECRET = os.getenv('GITHUB_CLIENT_SECRET')  # Your GitHub OAuth App Client Secret
 
 # Swagger settings
 SWAGGER_SETTINGS = {
