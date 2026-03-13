@@ -1,13 +1,23 @@
+import secrets
+import logging
+
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import login, get_user_model
 from django.contrib import messages
 from django.conf import settings
+from django.core.paginator import Paginator
+from django.views.decorators.http import require_POST
 from .models import Post, Comment, Like
+
+logger = logging.getLogger(__name__)
 
 
 def home(request):
-    posts = Post.objects.all()
+    post_list = Post.objects.all()
+    paginator = Paginator(post_list, 9)
+    page = request.GET.get('page')
+    posts = paginator.get_page(page)
     return render(request, 'blog/home.html', {'posts': posts})
 
 
@@ -62,6 +72,7 @@ def delete_post(request, pk):
 
 
 @login_required
+@require_POST
 def like_post(request, pk):
     post = get_object_or_404(Post, pk=pk)
     like, created = Like.objects.get_or_create(post=post, user=request.user)
@@ -91,11 +102,28 @@ def delete_comment(request, pk):
 
 @login_required
 def my_posts(request):
-    posts = Post.objects.filter(author=request.user)
+    post_list = Post.objects.filter(author=request.user)
+    paginator = Paginator(post_list, 10)
+    page = request.GET.get('page')
+    posts = paginator.get_page(page)
     return render(request, 'blog/my_posts.html', {'posts': posts})
 
 
 # --- OAuth Views ---
+
+def _generate_oauth_state(request):
+    """Generate and store a random state parameter for OAuth CSRF protection."""
+    state = secrets.token_urlsafe(32)
+    request.session['oauth_state'] = state
+    return state
+
+
+def _verify_oauth_state(request):
+    """Verify the OAuth state parameter matches the session."""
+    state = request.GET.get('state', '')
+    expected = request.session.pop('oauth_state', None)
+    return state and state == expected
+
 
 def github_login(request):
     """Redirect to GitHub's OAuth authorization page."""
@@ -103,18 +131,24 @@ def github_login(request):
     if not client_id:
         messages.error(request, 'GitHub OAuth is not configured.')
         return redirect('authease-login')
+    state = _generate_oauth_state(request)
     callback_url = request.build_absolute_uri('/oauth/github/callback/')
     github_auth_url = (
         f"https://github.com/login/oauth/authorize"
         f"?client_id={client_id}"
         f"&redirect_uri={callback_url}"
         f"&scope=user:email"
+        f"&state={state}"
     )
     return redirect(github_auth_url)
 
 
 def github_callback(request):
     """Handle GitHub OAuth callback, log the user in."""
+    if not _verify_oauth_state(request):
+        messages.error(request, 'Authentication failed. Please try again.')
+        return redirect('authease-login')
+
     code = request.GET.get('code')
     if not code:
         messages.error(request, 'GitHub authentication failed.')
@@ -144,12 +178,13 @@ def github_callback(request):
 
         User = get_user_model()
         user = User.objects.get(email=email)
-        login(request, user)
+        login(request, user, backend='django.contrib.auth.backends.ModelBackend')
         messages.success(request, f'Welcome, {user.first_name}!')
         return redirect('home')
 
     except Exception as e:
-        messages.error(request, f'GitHub login failed: {e}')
+        logger.exception('GitHub OAuth login failed')
+        messages.error(request, 'GitHub login failed. Please try again.')
         return redirect('authease-login')
 
 
@@ -159,20 +194,26 @@ def google_login(request):
     if not client_id:
         messages.error(request, 'Google OAuth is not configured.')
         return redirect('authease-login')
+    state = _generate_oauth_state(request)
     callback_url = request.build_absolute_uri('/oauth/google/callback/')
     google_auth_url = (
         f"https://accounts.google.com/o/oauth2/v2/auth"
         f"?client_id={client_id}"
         f"&redirect_uri={callback_url}"
         f"&response_type=code"
-        f"&scope=openid+email+profile"
+        f"&scope=openid%20email%20profile"
         f"&access_type=offline"
+        f"&state={state}"
     )
     return redirect(google_auth_url)
 
 
 def google_callback(request):
     """Handle Google OAuth callback, exchange code for tokens, log the user in."""
+    if not _verify_oauth_state(request):
+        messages.error(request, 'Authentication failed. Please try again.')
+        return redirect('authease-login')
+
     code = request.GET.get('code')
     if not code:
         messages.error(request, 'Google authentication failed.')
@@ -213,10 +254,11 @@ def google_callback(request):
 
         User = get_user_model()
         user = User.objects.get(email=email)
-        login(request, user)
+        login(request, user, backend='django.contrib.auth.backends.ModelBackend')
         messages.success(request, f'Welcome, {user.first_name}!')
         return redirect('home')
 
     except Exception as e:
-        messages.error(request, f'Google login failed: {e}')
+        logger.exception('Google OAuth login failed')
+        messages.error(request, 'Google login failed. Please try again.')
         return redirect('authease-login')

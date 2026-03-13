@@ -82,14 +82,15 @@
     }
 
     var remaining = getRemaining();
-    if (remaining <= 0) {
-        startTimer();
-    } else {
+    if (remaining > 0) {
         updateUI();
         var interval = setInterval(function() {
             updateUI();
             if (getRemaining() <= 0) clearInterval(interval);
         }, 1000);
+    } else {
+        btn.disabled = false;
+        timerSpan.textContent = '';
     }
 
     form.addEventListener('submit', function() { startTimer(); });
